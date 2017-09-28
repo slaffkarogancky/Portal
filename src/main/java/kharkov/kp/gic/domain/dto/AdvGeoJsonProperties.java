@@ -49,6 +49,10 @@ public class AdvGeoJsonProperties implements LongLatCoordHolder{
 	@JsonProperty("ct") 
 	private int constructionTypeId;
 	
+	// глобальный тип конструкции
+	@JsonProperty("gt") 
+	private int globalTypeId;
+	
 	// размер конструкции
 	@JsonProperty("sz") 
 	private String sizes;

@@ -12,14 +12,18 @@
 	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 <script
 	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-
-<script>
-	$(function() {
-		alert('Подключена последняя версия jQuery через Google хостинг');
-	});
-</script>
-
 <style>
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+#map{
+  min-height:100%;
+  min-width:100%;
+  display:flex;
+  position:relative;
+}
 .ol-popup {
 	position: absolute;
 	background-color: white;
@@ -30,7 +34,7 @@
 	border: 1px solid #cccccc;
 	bottom: 12px;
 	left: -50px;
-	min-width: 280px;
+	min-width: 380px;
 }
 
 .ol-popup:after, .ol-popup:before {
@@ -76,46 +80,137 @@
 		<div id="popup-content"></div>
 	</div>
 	<script>
-		var container = document.getElementById('popup');
-		var content = document.getElementById('popup-content');
-		var closer = document.getElementById('popup-closer');
+		$(function() {
+			// Создаем всплывающее окно
+			var container = document.getElementById('popup');
+			var content = document.getElementById('popup-content');
+			var closer = document.getElementById('popup-closer');
+			var overlay = new ol.Overlay(({
+				element : container,
+				autoPan : true,
+				autoPanAnimation : {
+					duration : 250
+				}
+			}));
+			closer.onclick = function() {
+				overlay.setPosition(undefined);
+				closer.blur();
+				return false;
+			};
 
-		var overlay = new ol.Overlay(({
-			element : container,
-			autoPan : true,
-			autoPanAnimation : {
-				duration : 250
+			// Инициализируем Map
+			var kharkov = ol.proj.fromLonLat([ 36.280, 49.9884 ]);
+			var map = new ol.Map({
+				target : 'map',
+				layers : [ new ol.layer.Tile({
+					source : new ol.source.OSM()
+				}) ],
+				overlays : [ overlay ],
+				loadTilesWhileAnimating : true,
+				view : new ol.View({
+					center : kharkov,
+					zoom : 12
+				})
+			});
+			
+			map.on('singleclick', function(evt) {
+				if (overlay.getPosition){
+					overlay.setPosition(undefined);
+					closer.blur();
+				}
+		        var _feature = map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+					return feature;
+				});
+				if (_feature && _feature.get('features').length === 1) {
+					var props = _getFeatureProperties(_feature);
+					var detailInfo = "";
+					if (props.ctm) 
+						detailInfo += '<p><strong>Заказчик: </strong><em>'+ props.ctm +'</em></p>';
+					if (props.tx) 
+						detailInfo += '<p><strong>Код заказчика: </strong><em>'+ props.tx +'</em></p>';		 
+					if (props.em) 
+						detailInfo += '<p><strong>E-mail: </strong><em>'+ props.em +'</em></p>';
+					if (props.ph) 
+						detailInfo += '<p><strong>Телефон: </strong><em>'+ props.ph +'</em></p>';
+					if (props.adr)
+						detailInfo += '<p><strong>Адрес: </strong><em>'+ props.adr +'</em></p>';
+					if (props.sz) 
+						detailInfo += '<p><strong>Размер: </strong><em>'+ props.sz +'</em></p>';
+					if (props.pm) 
+						detailInfo += '<p><strong>№ разрешения: </strong><em>'+ props.pm +'</em></p>';
+					if (props.pmd) 
+						detailInfo += '<p><strong>Дата разрешения: </strong><em>'+ props.pmd +'</em></p>';					
+					var coordinate = evt.coordinate;
+					content.innerHTML = detailInfo;
+					overlay.setPosition(coordinate);					
+				}
+			});
+			
+			function _getFeatureProperties(feature){
+				try
+				{
+					if (feature)
+						return feature.getProperties().features[0].getProperties();					
+				}
+				catch(e){console.log('ERROR: wrong feature!');}
 			}
-		}));
 
-		closer.onclick = function() {
-			overlay.setPosition(undefined);
-			closer.blur();
-			return false;
-		};
+			// Извлекаем данные
+			$.get("http://localhost:2018/portal/api/v1/advertize").done(
+					function(data) {
+						var advertisments = (new ol.format.GeoJSON())
+								.readFeatures(data);
+						advertisments.forEach(function(item) {
+							var geom = new ol.geom.Point(ol.proj.transform(item
+									.getGeometry().getCoordinates(),
+									'EPSG:4326', 'EPSG:3857'));
+							item.setGeometry(geom);
+						});
+						var vectorSource = new ol.source.Vector({
+							features : advertisments
+						});
+						var clusterSource = new ol.source.Cluster({
+							distance : 20,
+							source : vectorSource
+						});
+						var styleCache = {};
+						var advertIcons = [];
+						for(var i=0; i <5; i++){
+							advertIcons[i] = new ol.style.Style({image: new ol.style.Icon({src: "./images/"+i+".png"})});
+						}
+						var adverLayer = new ol.layer.Vector({
+							source : clusterSource,
+							style : function(feature) {
+								var size = feature.get('features').length;
+								if (size === 1){
+									var advTypeId = _getFeatureProperties(feature).gt;	
+									return advertIcons[advTypeId];
+								}									
+								var style = styleCache[size];
+								if (!style) {									
+									var _radius = 10, _fill = '#90EE90';
+									if (size > 70) {_radius = 32, _fill = '#00FF00'}
+									if (size > 50) {_radius = 24, _fill = '#008000'}
+									if (size > 5) {_radius = 16, _fill = '#32CD32'}	
+									style = new ol.style.Style({
+										image : new ol.style.Circle({
+											radius : _radius,
+											stroke : new ol.style.Stroke({color : '#fff'}),
+											fill : new ol.style.Fill({color : _fill})
+										}),
+										text : new ol.style.Text({
+											text : size.toString(),
+											fill : new ol.style.Fill({color : '#fff'})
+										})
+									});
+								styleCache[size] = style;
+								}
+								return style;
+							}
+						});
+						map.addLayer(adverLayer);
+					});
 
-		var kharkov = ol.proj.fromLonLat([ 36.2429, 49.9984 ]);
-		var map = new ol.Map({
-			target : 'map',
-			layers : [ new ol.layer.Tile({
-				source : new ol.source.OSM()
-			}) ],
-			overlays : [ overlay ],
-			loadTilesWhileAnimating : true,
-			view : new ol.View({
-				center : kharkov,
-				zoom : 12
-			})
-		});
-
-		map.on('singleclick', function(evt) {
-			var coordinate = evt.coordinate;
-			var hdms = ol.coordinate.toStringHDMS(ol.proj.transform(coordinate,
-					'EPSG:3857', 'EPSG:4326'));
-
-			content.innerHTML = '<p>You clicked here:</p><code>' + hdms
-					+ '</code>';
-			overlay.setPosition(coordinate);
 		});
 	</script>
 </body>
