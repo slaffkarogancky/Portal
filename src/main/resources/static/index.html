@@ -1,10 +1,122 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-    <title>Web Portal</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Web Portal</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<link rel="stylesheet"
+	href="https://openlayers.org/en/v4.3.4/css/ol.css" type="text/css">
+<script src="https://openlayers.org/en/v4.3.4/build/ol.js"></script>
+<script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<script
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+<script>
+	$(function() {
+		alert('Подключена последняя версия jQuery через Google хостинг');
+	});
+</script>
+
+<style>
+.ol-popup {
+	position: absolute;
+	background-color: white;
+	-webkit-filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
+	filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
+	padding: 15px;
+	border-radius: 10px;
+	border: 1px solid #cccccc;
+	bottom: 12px;
+	left: -50px;
+	min-width: 280px;
+}
+
+.ol-popup:after, .ol-popup:before {
+	top: 100%;
+	border: solid transparent;
+	content: " ";
+	height: 0;
+	width: 0;
+	position: absolute;
+	pointer-events: none;
+}
+
+.ol-popup:after {
+	border-top-color: white;
+	border-width: 10px;
+	left: 48px;
+	margin-left: -10px;
+}
+
+.ol-popup:before {
+	border-top-color: #cccccc;
+	border-width: 11px;
+	left: 48px;
+	margin-left: -11px;
+}
+
+.ol-popup-closer {
+	text-decoration: none;
+	position: absolute;
+	top: 2px;
+	right: 8px;
+}
+
+.ol-popup-closer:after {
+	content: "✖";
+}
+</style>
 </head>
 <body>
-    <p>Try, baby try, to trust in my love again!!!</p>
+	<div id="map" class="map"></div>
+	<div id="popup" class="ol-popup">
+		<a href="#" id="popup-closer" class="ol-popup-closer"></a>
+		<div id="popup-content"></div>
+	</div>
+	<script>
+		var container = document.getElementById('popup');
+		var content = document.getElementById('popup-content');
+		var closer = document.getElementById('popup-closer');
+
+		var overlay = new ol.Overlay(({
+			element : container,
+			autoPan : true,
+			autoPanAnimation : {
+				duration : 250
+			}
+		}));
+
+		closer.onclick = function() {
+			overlay.setPosition(undefined);
+			closer.blur();
+			return false;
+		};
+
+		var kharkov = ol.proj.fromLonLat([ 36.2429, 49.9984 ]);
+		var map = new ol.Map({
+			target : 'map',
+			layers : [ new ol.layer.Tile({
+				source : new ol.source.OSM()
+			}) ],
+			overlays : [ overlay ],
+			loadTilesWhileAnimating : true,
+			view : new ol.View({
+				center : kharkov,
+				zoom : 12
+			})
+		});
+
+		map.on('singleclick', function(evt) {
+			var coordinate = evt.coordinate;
+			var hdms = ol.coordinate.toStringHDMS(ol.proj.transform(coordinate,
+					'EPSG:3857', 'EPSG:4326'));
+
+			content.innerHTML = '<p>You clicked here:</p><code>' + hdms
+					+ '</code>';
+			overlay.setPosition(coordinate);
+		});
+	</script>
 </body>
 </html>

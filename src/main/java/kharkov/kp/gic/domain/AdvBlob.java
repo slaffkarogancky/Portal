@@ -21,9 +21,6 @@ public class AdvBlob {
 	@Column(name="id")
 	protected Integer id;
 	
-	@Column(name="doc_id")
-	protected int constructionId;
-	
 	@Lob
 	@Basic(fetch=FetchType.EAGER)	
 	@Column(name="screen")

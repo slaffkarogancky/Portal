@@ -1,8 +1,8 @@
-package kharkov.kp.gic.domain.dto;
+package kharkov.kp.gic.domain.geojson;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class GeoJsonPoint<T> {
+public class GeoJsonFeaturePoint {
 
 	@JsonProperty("type")
 	public final String type = "Feature";
@@ -11,9 +11,9 @@ public class GeoJsonPoint<T> {
 	public final GeoJsonPointGeometry geometry;
 	
 	@JsonProperty("properties")
-	public final T properties;
+	public final Object properties;
 
-	public GeoJsonPoint(double longitude, double latitude, T properties) {
+	public GeoJsonFeaturePoint(double longitude, double latitude, Object properties) {
 		this.geometry = new GeoJsonPointGeometry(longitude, latitude);
 		this.properties = properties;
 	}

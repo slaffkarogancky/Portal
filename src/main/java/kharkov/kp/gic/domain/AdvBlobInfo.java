@@ -18,5 +18,6 @@ public class AdvBlobInfo {
 	protected Integer id;
 	
 	@Column(name="doc_id")
-	protected int constructionId;
+	protected int constructionId;	
+
 }

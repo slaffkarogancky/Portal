@@ -1,7 +1,5 @@
 package kharkov.kp.gic.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -12,8 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import kharkov.kp.gic.domain.dto.AdvGeoJsonProperties;
-import kharkov.kp.gic.domain.dto.GeoJsonPoint;
+//import kharkov.kp.gic.domain.geojson.GeoJsonFeatureCollection;
 import kharkov.kp.gic.service.AdvService;
 
 
@@ -40,9 +37,8 @@ public class AdvController {
 	
 	// http://localhost:2018/portal/api/v1/advertize
 	@GetMapping(produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<Iterable<GeoJsonPoint<AdvGeoJsonProperties>>> getAllDepartments() {
-		List<GeoJsonPoint<AdvGeoJsonProperties>> list = advertConstructionService.getAdvertConstructionTree();
-		return new ResponseEntity<Iterable<GeoJsonPoint<AdvGeoJsonProperties>>>(list, HttpStatus.OK);
+	public ResponseEntity<String> getAllDepartments() {
+		String content = advertConstructionService.getAdvertiseGeoJsonCollection();
+		return new ResponseEntity<String>(content, HttpStatus.OK);
 	}
-	
 }

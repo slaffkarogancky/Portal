@@ -4,9 +4,11 @@ import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import kharkov.kp.gic.domain.geojson.LongLatCoordHolder;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +16,7 @@ import lombok.NoArgsConstructor;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Data @NoArgsConstructor @AllArgsConstructor @Builder
-public class AdvGeoJsonProperties {
+public class AdvGeoJsonProperties implements LongLatCoordHolder{
 
 	@JsonProperty("id")
 	private Integer id;
@@ -63,9 +65,20 @@ public class AdvGeoJsonProperties {
 	@JsonProperty("bs") 
 	private List<Integer> blobs;
 	
-	public void setBlobs(List<Integer> _blobs) {
-		if ((_blobs != null) && (_blobs.size() > 0)) {
-			this.blobs = _blobs;
-		}
+    // Необходимо для имплементации LongLatCoordHolder
+	private double longitude;
+	
+	private double latitude;
+
+	@Override
+	@JsonIgnore
+	public double getLongitude() {
+		return longitude;
+	}
+
+	@Override
+	@JsonIgnore
+	public double getLatitude() {
+		return latitude;
 	}
 }
