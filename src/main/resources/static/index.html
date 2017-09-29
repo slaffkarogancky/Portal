@@ -183,12 +183,14 @@ html, body {
 							style : function(feature) {
 								var size = feature.get('features').length;
 								if (size === 1){
-									var advTypeId = _getFeatureProperties(feature).gt;	
-									return advertIcons[advTypeId];
+									//var advTypeId = _getFeatureProperties(feature).gt;	
+									//return advertIcons[advTypeId];
+									return advertIcons[4];
 								}									
 								var style = styleCache[size];
 								if (!style) {									
 									var _radius = 10, _fill = '#90EE90';
+									if (size > 100) {_radius = 40, _fill = '#00FF00'}
 									if (size > 70) {_radius = 32, _fill = '#00FF00'}
 									if (size > 50) {_radius = 24, _fill = '#008000'}
 									if (size > 5) {_radius = 16, _fill = '#32CD32'}	
