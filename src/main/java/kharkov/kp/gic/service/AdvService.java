@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,11 +39,16 @@ public class AdvService {
 	@Autowired
 	private AdvBlobInfoRepository advBlobInfoRepository;
 	
-	private String advertiseJsonCache;
+	@Autowired
+	private StringRedisTemplate _template;
+	
+	private final String ADVERTIZE_TREE_REDIS_KEY = "advertize:tree";
 	
 	@Transactional(readOnly = true)
-	public String getAdvertiseGeoJsonCollection() {
-		if (advertiseJsonCache == null) {
+	public String getAdvertiseGeoJsonCollection() {				
+		String resultTree = _template.opsForValue().get(ADVERTIZE_TREE_REDIS_KEY);	
+		//also you can use   _template.boundValueOps(ADVERTIZE_TREE_REDIS_KEY).get();
+		if (resultTree == null) {
 			// Извлекаем из базы данных список рекламных конструкций, их координаты и блобы
 			List<AdvConstr> constrs = advConstrRepository.findAll(); 
 			List<AdvCoord> coords = advCoordRepository.findAll();
@@ -55,10 +61,12 @@ public class AdvService {
 													 .collect(Collectors.toList());
 			// формируем коллекцию в формате GeoJson
 			GeoJsonFeatureCollection geoJsonCollection = new GeoJsonFeatureCollection("EPSG:3857", features);
-			// и трансформируем ее в строку, для последующего хранения в Redis
-			advertiseJsonCache = _serializeToJson(geoJsonCollection);
+			// и трансформируем ее в строку
+			resultTree = _serializeToJson(geoJsonCollection);
+			// сохраняем в Redis
+			_template.opsForValue().set(ADVERTIZE_TREE_REDIS_KEY, resultTree);
 		}
-		return advertiseJsonCache;
+		return resultTree;
 	}
 	
 	@Transactional(readOnly = true)
