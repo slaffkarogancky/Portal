@@ -11,15 +11,15 @@ public class AdvConverter {
 		// @formatter:off
 		AdvGeoJsonProperties result = AdvGeoJsonProperties.builder()		
 											  .id(source.getConstructionId())		
-											  .customer(_nullifyIfNeed(source.getCustomer()))
-											  .customerCode(_nullifyIfNeed(source.getCustomerCode()))
-											  .email(_nullifyIfNeed(source.getEmail()))
-											  .phone(_nullifyIfNeed(source.getPhone()))
-											  .address(_nullifyIfNeed(source.getAddress()))
-											  .crossAddress(_nullifyIfNeed(source.getCrossAddress()))
+											  .customer(Utils.nullifyIfNeed(source.getCustomer()))
+											  .customerCode(Utils.nullifyIfNeed(source.getCustomerCode()))
+											  .email(Utils.nullifyIfNeed(source.getEmail()))
+											  .phone(Utils.nullifyIfNeed(source.getPhone()))
+											  .address(Utils.nullifyIfNeed(source.getAddress()))
+											  .crossAddress(Utils.nullifyIfNeed(source.getCrossAddress()))
 											  .constructionTypeId(source.getConstructionTypeId())
 											  .globalTypeId(_getGlobalTypeId(source.getConstructionTypeId()))
-											  .sizes(_nullifyIfNeed(source.getSizes()))
+											  .sizes(Utils.nullifyIfNeed(source.getSizes()))
 											  .permintNumber(source.getPermintNumber())
 											  .permitUntill(source.getPermitUntill())
 											  .longitude(longitude)
@@ -30,13 +30,7 @@ public class AdvConverter {
 		}
 		return result;
 		// @formatter:on
-	}
-
-	private static String _nullifyIfNeed(String source) {
-		if (source == null)
-			return null;
-		return source.trim().length() == 0 ? null : source.trim();
-	}
+	}	
 
 	private static int _getGlobalTypeId(int typeId) {
 		switch (typeId) {

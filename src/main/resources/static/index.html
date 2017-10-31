@@ -26,7 +26,7 @@ html, body {
 }
 .ol-popup {
 	position: absolute;
-	background-color: white;
+	background-color: #F8F3D5;
 	-webkit-filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
 	filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
 	padding: 15px;
@@ -48,7 +48,7 @@ html, body {
 }
 
 .ol-popup:after {
-	border-top-color: white;
+	border-top-color: #F8F3D5;
 	border-width: 10px;
 	left: 48px;
 	margin-left: -10px;
@@ -123,7 +123,7 @@ html, body {
 				});
 				if (_feature && _feature.get('features').length === 1) {
 					var props = _getFeatureProperties(_feature);
-					var detailInfo = "";
+					var detailInfo = '';
 					if (props.ctm) 
 						detailInfo += '<p><strong>Заказчик: </strong><em>'+ props.ctm +'</em></p>';
 					if (props.tx) 
@@ -139,7 +139,7 @@ html, body {
 					if (props.pm) 
 						detailInfo += '<p><strong>№ разрешения: </strong><em>'+ props.pm +'</em></p>';
 					if (props.pmd) 
-						detailInfo += '<p><strong>Дата разрешения: </strong><em>'+ props.pmd +'</em></p>';					
+						detailInfo += '<p><strong>Дата разрешения: </strong><em>'+ props.pmd +'</em></p>';	
 					var coordinate = evt.coordinate;
 					content.innerHTML = detailInfo;
 					overlay.setPosition(coordinate);					
@@ -156,7 +156,8 @@ html, body {
 			}
 
 			// Извлекаем данные
-			$.get("http://localhost:2018/portal/api/v1/advertize").done(
+			//$.get("http://localhost:2018/portal/api/v1/advertize").done(
+			$.get("http://10.0.0.22:2018/portal/api/v1/advertize").done(
 					function(data) {
 						var advertisments = (new ol.format.GeoJSON())
 								.readFeatures(data);

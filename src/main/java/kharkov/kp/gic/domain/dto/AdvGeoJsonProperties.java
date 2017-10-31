@@ -63,7 +63,7 @@ public class AdvGeoJsonProperties implements LongLatCoordHolder{
 	
 	// дата разрешения
 	@JsonProperty("pmd") 
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy", timezone="Europe/Kiev")
 	private Date permitUntill;
 	
 	@JsonProperty("bs") 

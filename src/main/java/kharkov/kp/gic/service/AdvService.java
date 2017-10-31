@@ -44,11 +44,13 @@ public class AdvService {
 	
 	private final String ADVERTIZE_TREE_REDIS_KEY = "advertize:tree";
 	
+	private String advertCache; // временное решение, чтобы не трахаться каждый раз с Redis
+	
 	@Transactional(readOnly = true)
 	public String getAdvertiseGeoJsonCollection() {				
-		String resultTree = _template.opsForValue().get(ADVERTIZE_TREE_REDIS_KEY);	
-		//also you can use   _template.boundValueOps(ADVERTIZE_TREE_REDIS_KEY).get();
-		if (resultTree == null) {
+		//String resultTree = _template.opsForValue().get(ADVERTIZE_TREE_REDIS_KEY);	//_template.boundValueOps(ADVERTIZE_TREE_REDIS_KEY).get();
+		//if (resultTree == null) {
+		if (advertCache == null) {
 			// Извлекаем из базы данных список рекламных конструкций, их координаты и блобы
 			List<AdvConstr> constrs = advConstrRepository.findAll(); 
 			List<AdvCoord> coords = advCoordRepository.findAll();
@@ -62,11 +64,15 @@ public class AdvService {
 			// формируем коллекцию в формате GeoJson
 			GeoJsonFeatureCollection geoJsonCollection = new GeoJsonFeatureCollection("EPSG:3857", features);
 			// и трансформируем ее в строку
-			resultTree = _serializeToJson(geoJsonCollection);
+			
+			advertCache = _serializeToJson(geoJsonCollection);
+			
+			//resultTree = _serializeToJson(geoJsonCollection);
 			// сохраняем в Redis
-			_template.opsForValue().set(ADVERTIZE_TREE_REDIS_KEY, resultTree);
+			//_template.opsForValue().set(ADVERTIZE_TREE_REDIS_KEY, resultTree);
 		}
-		return resultTree;
+		//return resultTree;
+		return advertCache;
 	}
 	
 	@Transactional(readOnly = true)
