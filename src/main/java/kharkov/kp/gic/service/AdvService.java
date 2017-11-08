@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,10 +38,10 @@ public class AdvService {
 	@Autowired
 	private AdvBlobInfoRepository advBlobInfoRepository;
 	
-	@Autowired
-	private StringRedisTemplate _template;
+	//@Autowired
+	//private StringRedisTemplate _template;
 	
-	private final String ADVERTIZE_TREE_REDIS_KEY = "advertize:tree";
+	//private final String ADVERTIZE_TREE_REDIS_KEY = "advertize:tree";
 	
 	private String advertCache; // временное решение, чтобы не трахаться каждый раз с Redis
 	
